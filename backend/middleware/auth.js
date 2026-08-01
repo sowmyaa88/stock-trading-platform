@@ -1,6 +1,12 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "stock_trading_jwt_secret_key_2026";
+if (!process.env.JWT_SECRET) {
+  throw new Error(
+    "FATAL SECURITY ERROR: JWT_SECRET environment variable is missing. Server refusing to start without a configured secret."
+  );
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;

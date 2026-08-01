@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
@@ -20,6 +21,21 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// ----------------------------------------------------
+// SECURITY & RATE LIMITING
+// ----------------------------------------------------
+// Limit authentication attempts to 10 requests per 15 minutes per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many authentication attempts from this IP. Please try again after 15 minutes." },
+});
+
+app.use("/login", authLimiter);
+app.use("/signup", authLimiter);
 
 // Fallback seed datasets when database is unpopulated or offline
 const tempHoldings = [
@@ -72,7 +88,7 @@ app.get("/allPositions", verifyToken, async (req, res) => {
   }
 });
 
-// GET /allOrders
+// GET /allOrders (Protected)
 app.get("/allOrders", verifyToken, async (req, res) => {
   try {
     let allOrders = await OrdersModel.find({}).sort({ createdAt: -1 });
@@ -82,7 +98,7 @@ app.get("/allOrders", verifyToken, async (req, res) => {
   }
 });
 
-// POST /newOrder (With Authentication & Input Validation)
+// POST /newOrder (Protected & Input Validated)
 app.post("/newOrder", verifyToken, async (req, res) => {
   try {
     const { name, qty, price, mode } = req.body;
@@ -125,7 +141,7 @@ app.post("/newOrder", verifyToken, async (req, res) => {
   }
 });
 
-// POST /signup (Secure User Registration with Bcrypt Password Hashing & JWT)
+// POST /signup (Secure Registration with Bcrypt & JWT)
 app.post("/signup", async (req, res) => {
   try {
     const { email, mobile, password } = req.body;
@@ -139,10 +155,9 @@ app.post("/signup", async (req, res) => {
     // Check if user already exists
     let existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      // Verify password for existing user
       const isMatch = await bcrypt.compare(password, existingUser.password);
       if (!isMatch) {
-        return res.status(401).json({ error: "Invalid password for existing email account." });
+        return res.status(401).json({ error: "Invalid email or password." });
       }
       
       const token = jwt.sign(
@@ -187,7 +202,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// POST /login (Secure User Authentication with Bcrypt Password Verification & JWT)
+// POST /login (Prevent Account Enumeration: Uniform 401 Response & Bcrypt Verification)
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -197,13 +212,15 @@ app.post("/login", async (req, res) => {
 
     let user = await UserModel.findOne({ email });
     if (!user) {
-      return res.status(404).json({ error: "User account not found. Please sign up." });
+      // Uniform 401 error message to prevent account enumeration
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
     // Verify password with bcrypt
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid password. Access denied." });
+      // Uniform 401 error message to prevent account enumeration
+      return res.status(401).json({ error: "Invalid email or password." });
     }
 
     // Generate JWT token
