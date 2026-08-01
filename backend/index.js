@@ -46,8 +46,8 @@ const tempPositions = [
 // REST API ENDPOINTS
 // ----------------------------------------------------
 
-// GET /allHoldings
-app.get("/allHoldings", async (req, res) => {
+// GET /allHoldings (Protected)
+app.get("/allHoldings", verifyToken, async (req, res) => {
   try {
     let allHoldings = await HoldingsModel.find({});
     if (!allHoldings || allHoldings.length === 0) {
@@ -59,8 +59,8 @@ app.get("/allHoldings", async (req, res) => {
   }
 });
 
-// GET /allPositions
-app.get("/allPositions", async (req, res) => {
+// GET /allPositions (Protected)
+app.get("/allPositions", verifyToken, async (req, res) => {
   try {
     let allPositions = await PositionsModel.find({});
     if (!allPositions || allPositions.length === 0) {

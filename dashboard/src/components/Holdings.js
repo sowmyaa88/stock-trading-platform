@@ -3,12 +3,19 @@ import axios from "axios";
 import { VerticalGraph } from "./VerticalGraph";
 import { holdings } from "../data/data";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3002";
+
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState(holdings);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     axios
-      .get("http://localhost:3002/allHoldings")
+      .get(`${API_URL}/allHoldings`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      })
       .then((res) => {
         if (res.data && Array.isArray(res.data) && res.data.length > 0) {
           setAllHoldings(res.data);
