@@ -211,7 +211,12 @@ app.post("/newOrder", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("App started!");
-  mongoose.connect(uri);
-  console.log("DB started!");
+  console.log(`Server started on port ${PORT}!`);
+  if (uri && !uri.includes("<<")) {
+    mongoose.connect(uri)
+      .then(() => console.log("Database connected successfully!"))
+      .catch((err) => console.log("Database connection error:", err.message));
+  } else {
+    console.log("No MONGO_URL set in .env file. Running server in standalone mode.");
+  }
 });
