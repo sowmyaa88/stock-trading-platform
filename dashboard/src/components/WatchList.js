@@ -106,8 +106,6 @@ const WatchList = () => {
   );
 };
 
-export default WatchList;
-
 const WatchListItem = ({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
 
@@ -184,3 +182,5 @@ const WatchListActions = ({ uid }) => {
     </span>
   );
 };
+
+export default WatchList;
