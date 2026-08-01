@@ -31,13 +31,21 @@ const BuyActionWindow = ({ uid }) => {
     setIsSubmitting(true);
 
     try {
-      await axios.post(`${API_URL}/newOrder`, {
-        name: uid,
-        qty: qty,
-        price: price,
-        mode: "BUY",
-        userId: "sowmyaa88",
-      });
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_URL}/newOrder`,
+        {
+          name: uid,
+          qty: qty,
+          price: price,
+          mode: "BUY",
+        },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
+      );
 
       setIsSubmitting(false);
       if (generalContext && generalContext.closeBuyWindow) {

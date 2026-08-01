@@ -4,11 +4,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
 const { UserModel } = require("./model/UserModel");
+const { verifyToken, JWT_SECRET } = require("./middleware/auth");
 
 const PORT = process.env.PORT || 3002;
 const uri = process.env.MONGO_URL;
@@ -70,7 +73,7 @@ app.get("/allPositions", async (req, res) => {
 });
 
 // GET /allOrders
-app.get("/allOrders", async (req, res) => {
+app.get("/allOrders", verifyToken, async (req, res) => {
   try {
     let allOrders = await OrdersModel.find({}).sort({ createdAt: -1 });
     res.json(allOrders);
@@ -79,12 +82,12 @@ app.get("/allOrders", async (req, res) => {
   }
 });
 
-// POST /newOrder (With Input Validation)
-app.post("/newOrder", async (req, res) => {
+// POST /newOrder (With Authentication & Input Validation)
+app.post("/newOrder", verifyToken, async (req, res) => {
   try {
     const { name, qty, price, mode } = req.body;
 
-    // Strict input validation
+    // Input Validation
     if (!name || typeof name !== "string" || name.trim() === "") {
       return res.status(400).json({ error: "Stock name is required." });
     }
@@ -101,12 +104,15 @@ app.post("/newOrder", async (req, res) => {
       return res.status(400).json({ error: "Order mode must be either BUY or SELL." });
     }
 
+    // Extract authenticated userId securely from decoded JWT token
+    const authenticatedUserId = req.user?.username || req.user?.id || "sowmyaa88";
+
     let newOrder = new OrdersModel({
       name: name.trim().toUpperCase(),
       qty: parsedQty,
       price: parsedPrice,
       mode: mode.toUpperCase(),
-      userId: req.body.userId || "sowmyaa88",
+      userId: authenticatedUserId,
       status: "COMPLETE",
       createdAt: new Date(),
     });
@@ -119,54 +125,101 @@ app.post("/newOrder", async (req, res) => {
   }
 });
 
-// POST /signup (User Registration)
+// POST /signup (Secure User Registration with Bcrypt Password Hashing & JWT)
 app.post("/signup", async (req, res) => {
   try {
     const { email, mobile, password } = req.body;
 
-    if (!email || !mobile) {
-      return res.status(400).json({ error: "Email and mobile number are required." });
+    if (!email || !mobile || !password) {
+      return res.status(400).json({ error: "Email, mobile number, and password are required." });
     }
 
     const username = email.split("@")[0] || "user";
     
-    // Check if user exists
-    let existingUser = await UserModel.findOne({ $or: [{ email }, { username }] });
+    // Check if user already exists
+    let existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      return res.json({ message: "User logged in successfully", user: existingUser });
+      // Verify password for existing user
+      const isMatch = await bcrypt.compare(password, existingUser.password);
+      if (!isMatch) {
+        return res.status(401).json({ error: "Invalid password for existing email account." });
+      }
+      
+      const token = jwt.sign(
+        { id: existingUser._id, username: existingUser.username, email: existingUser.email },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      const userObject = existingUser.toObject();
+      delete userObject.password;
+
+      return res.json({ message: "Welcome back! User logged in successfully.", token, user: userObject });
     }
+
+    // Hash password securely with bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     let newUser = new UserModel({
       username,
       email,
       mobile,
-      password: password || "defaultSecretPassword123",
+      password: hashedPassword,
     });
 
     await newUser.save();
-    res.status(201).json({ message: "Account created successfully!", user: newUser });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: newUser._id, username: newUser.username, email: newUser.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const userObject = newUser.toObject();
+    delete userObject.password;
+
+    res.status(201).json({ message: "Account created successfully!", token, user: userObject });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: "Server error during registration." });
   }
 });
 
-// POST /login (User Authentication)
+// POST /login (Secure User Authentication with Bcrypt Password Verification & JWT)
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "Email is required." });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required." });
     }
 
     let user = await UserModel.findOne({ email });
     if (!user) {
-      return res.status(404).json({ error: "User not found." });
+      return res.status(404).json({ error: "User account not found. Please sign up." });
     }
 
-    res.json({ message: "Login successful!", user });
+    // Verify password with bcrypt
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid password. Access denied." });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, username: user.username, email: user.email },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const userObject = user.toObject();
+    delete userObject.password;
+
+    res.json({ message: "Login successful!", token, user: userObject });
   } catch (err) {
-    res.status(500).json({ error: "Server error during login." });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error during authentication." });
   }
 });
 

@@ -9,8 +9,13 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     axios
-      .get(`${API_URL}/allOrders`)
+      .get(`${API_URL}/allOrders`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      })
       .then((res) => {
         if (res.data && Array.isArray(res.data)) {
           setOrders(res.data);

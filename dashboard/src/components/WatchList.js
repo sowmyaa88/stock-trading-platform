@@ -73,6 +73,13 @@ const WatchList = () => {
   // ],
   // };
 
+const WatchList = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredWatchlist = watchlist.filter((stock) =>
+    stock.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="watchlist-container">
       <div className="search-container">
@@ -82,12 +89,14 @@ const WatchList = () => {
           id="search"
           placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
           className="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <span className="counts"> {filteredWatchlist.length} / 50</span>
       </div>
 
       <ul className="list">
-        {watchlist.map((stock, index) => {
+        {filteredWatchlist.map((stock, index) => {
           return <WatchListItem stock={stock} key={index} />;
         })}
       </ul>

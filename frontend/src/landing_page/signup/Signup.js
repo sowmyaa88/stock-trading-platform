@@ -25,11 +25,16 @@ function Signup() {
     setIsSubmitting(true);
 
     try {
-      await axios.post(`${API_URL}/signup`, {
+      const res = await axios.post(`${API_URL}/signup`, {
         email: formData.email,
         mobile: formData.mobile,
         password: formData.password || "password123",
       });
+
+      if (res.data && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      }
 
       setIsSubmitting(false);
       setSubmitted(true);
