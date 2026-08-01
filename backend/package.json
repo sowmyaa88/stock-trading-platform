@@ -4,7 +4,8 @@
   "description": "Backend API for Stock Trading Platform",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "seed": "node seed.js"
   },
   "author": "sowmyaa88",
   "license": "ISC",

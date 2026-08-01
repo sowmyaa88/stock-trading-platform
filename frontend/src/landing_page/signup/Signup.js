@@ -1,15 +1,43 @@
 import React, { useState } from "react";
+import axios from "axios";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
 function Signup() {
   const [formData, setFormData] = useState({
     email: "",
     mobile: "",
+    password: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMsg("");
+
+    if (!formData.email || !formData.mobile) {
+      setErrorMsg("Please fill out all required fields.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await axios.post(`${API_URL}/signup`, {
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password || "password123",
+      });
+
+      setIsSubmitting(false);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Signup failed:", err);
+      setIsSubmitting(false);
+      setErrorMsg(err.response?.data?.error || "Registration failed. Is the backend server running?");
+    }
   };
 
   return (
@@ -25,17 +53,26 @@ function Signup() {
         <div className="col-5 p-5">
           {submitted ? (
             <div className="alert alert-success p-4 text-center">
-              <h4>🎉 Account Created!</h4>
+              <h4>🎉 Account Created Successfully!</h4>
               <p className="mt-2 text-muted">
-                Welcome to Stock Trading Platform! You can now log into your dashboard on <strong>http://localhost:3001</strong>.
+                Welcome to Stock Trading Platform! Your user account for <strong>{formData.email}</strong> is active.
               </p>
+              <a href="http://localhost:3001" className="btn btn-primary mt-3 px-4 py-2">
+                Go to Trading Dashboard
+              </a>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <h1 className="fs-2 mb-3">Signup now</h1>
               <p className="text-muted mb-4">
-                Or track your existing application
+                Create your account to start trading stocks & mutual funds
               </p>
+
+              {errorMsg && (
+                <div className="alert alert-danger p-2 mb-3" style={{ fontSize: "0.9rem" }}>
+                  {errorMsg}
+                </div>
+              )}
 
               <div className="mb-3">
                 <label className="form-label text-muted">Mobile Number</label>
@@ -68,16 +105,27 @@ function Signup() {
                 />
               </div>
 
-              <p className="text-muted" style={{ fontSize: "0.85rem" }}>
-                You will receive an OTP on your mobile number for verification.
-              </p>
+              <div className="mb-3">
+                <label className="form-label text-muted">Password</label>
+                <input
+                  type="password"
+                  className="form-control p-2"
+                  placeholder="Set a secure password"
+                  required
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+              </div>
 
               <button
                 type="submit"
                 className="btn btn-primary px-4 py-2 fs-5 mt-2"
                 style={{ width: "100%" }}
+                disabled={isSubmitting}
               >
-                Continue
+                {isSubmitting ? "Creating Account..." : "Continue"}
               </button>
 
               <p className="mt-4 text-muted" style={{ fontSize: "0.8rem" }}>
