@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
@@ -19,13 +20,35 @@ const uri = process.env.MONGO_URL;
 
 const app = express();
 
-app.use(cors());
+// ----------------------------------------------------
+// CORS & COOKIE PARSER CONFIGURATION (OPTION B)
+// ----------------------------------------------------
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  process.env.FRONTEND_URL,
+  process.env.DASHBOARD_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  })
+);
+
+app.use(cookieParser());
 app.use(bodyParser.json());
 
 // ----------------------------------------------------
 // SECURITY & RATE LIMITING
 // ----------------------------------------------------
-// Limit authentication attempts to 10 requests per 15 minutes per IP
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -57,6 +80,16 @@ const tempPositions = [
   { product: "CNC", name: "EVEREADY", qty: 2, avg: 316.27, price: 312.35, net: "+0.58%", day: "-1.24%", isLoss: true },
   { product: "CNC", name: "JUBLFOOD", qty: 1, avg: 3124.75, price: 3082.65, net: "+10.04%", day: "-1.35%", isLoss: true },
 ];
+
+// Helper to attach HTTP-only cookie
+const sendTokenCookie = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+};
 
 // ----------------------------------------------------
 // REST API ENDPOINTS
@@ -103,7 +136,6 @@ app.post("/newOrder", verifyToken, async (req, res) => {
   try {
     const { name, qty, price, mode } = req.body;
 
-    // Input Validation
     if (!name || typeof name !== "string" || name.trim() === "") {
       return res.status(400).json({ error: "Stock name is required." });
     }
@@ -120,7 +152,6 @@ app.post("/newOrder", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Order mode must be either BUY or SELL." });
     }
 
-    // Extract authenticated userId securely from decoded JWT token
     const authenticatedUserId = req.user?.username || req.user?.id || "sowmyaa88";
 
     let newOrder = new OrdersModel({
@@ -141,7 +172,7 @@ app.post("/newOrder", verifyToken, async (req, res) => {
   }
 });
 
-// POST /signup (Secure Registration with Bcrypt & JWT)
+// POST /signup (HTTP-Only Cookie Auth)
 app.post("/signup", async (req, res) => {
   try {
     const { email, mobile, password } = req.body;
@@ -152,7 +183,6 @@ app.post("/signup", async (req, res) => {
 
     const username = email.split("@")[0] || "user";
     
-    // Check if user already exists
     let existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       const isMatch = await bcrypt.compare(password, existingUser.password);
@@ -166,13 +196,13 @@ app.post("/signup", async (req, res) => {
         { expiresIn: "7d" }
       );
 
+      sendTokenCookie(res, token);
       const userObject = existingUser.toObject();
       delete userObject.password;
 
-      return res.json({ message: "Welcome back! User logged in successfully.", token, user: userObject });
+      return res.json({ message: "Welcome back! User logged in successfully.", user: userObject });
     }
 
-    // Hash password securely with bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -185,24 +215,24 @@ app.post("/signup", async (req, res) => {
 
     await newUser.save();
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: newUser._id, username: newUser.username, email: newUser.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
+    sendTokenCookie(res, token);
     const userObject = newUser.toObject();
     delete userObject.password;
 
-    res.status(201).json({ message: "Account created successfully!", token, user: userObject });
+    res.status(201).json({ message: "Account created successfully!", user: userObject });
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: "Server error during registration." });
   }
 });
 
-// POST /login (Prevent Account Enumeration: Uniform 401 Response & Bcrypt Verification)
+// POST /login (HTTP-Only Cookie Auth & Non-Enum 401)
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -212,32 +242,39 @@ app.post("/login", async (req, res) => {
 
     let user = await UserModel.findOne({ email });
     if (!user) {
-      // Uniform 401 error message to prevent account enumeration
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // Verify password with bcrypt
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      // Uniform 401 error message to prevent account enumeration
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, username: user.username, email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
+    sendTokenCookie(res, token);
     const userObject = user.toObject();
     delete userObject.password;
 
-    res.json({ message: "Login successful!", token, user: userObject });
+    res.json({ message: "Login successful!", user: userObject });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Server error during authentication." });
   }
+});
+
+// POST /logout (Clear HTTP-Only Cookie)
+app.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+  });
+  res.json({ message: "Logged out successfully." });
 });
 
 // ----------------------------------------------------

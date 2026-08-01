@@ -9,13 +9,9 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    // Option B: HTTP-Only cookies sent automatically via withCredentials: true
     axios
-      .get(`${API_URL}/allOrders`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-      })
+      .get(`${API_URL}/allOrders`, { withCredentials: true })
       .then((res) => {
         if (res.data && Array.isArray(res.data)) {
           setOrders(res.data);

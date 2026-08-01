@@ -31,7 +31,7 @@ const BuyActionWindow = ({ uid }) => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      // Option B: HTTP-Only cookie sent automatically via withCredentials: true
       await axios.post(
         `${API_URL}/newOrder`,
         {
@@ -40,11 +40,7 @@ const BuyActionWindow = ({ uid }) => {
           price: price,
           mode: "BUY",
         },
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
+        { withCredentials: true }
       );
 
       setIsSubmitting(false);

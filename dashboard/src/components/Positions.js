@@ -8,13 +8,9 @@ const Positions = () => {
   const [allPositions, setAllPositions] = useState(positions);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    // Option B: HTTP-Only cookies sent automatically via withCredentials: true
     axios
-      .get(`${API_URL}/allPositions`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-      })
+      .get(`${API_URL}/allPositions`, { withCredentials: true })
       .then((res) => {
         if (res.data && Array.isArray(res.data) && res.data.length > 0) {
           setAllPositions(res.data);

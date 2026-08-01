@@ -25,16 +25,16 @@ function Signup() {
     setIsSubmitting(true);
 
     try {
-      const res = await axios.post(`${API_URL}/signup`, {
-        email: formData.email,
-        mobile: formData.mobile,
-        password: formData.password || "password123",
-      });
-
-      if (res.data && res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-      }
+      // Option B: HTTP-Only cookie is automatically set by the server via withCredentials
+      await axios.post(
+        `${API_URL}/signup`,
+        {
+          email: formData.email,
+          mobile: formData.mobile,
+          password: formData.password || "password123",
+        },
+        { withCredentials: true }
+      );
 
       setIsSubmitting(false);
       setSubmitted(true);
