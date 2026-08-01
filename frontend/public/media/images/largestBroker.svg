@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="500" height="400">
+  <rect width="500" height="400" rx="16" fill="#f8fafc"/>
+  <circle cx="250" cy="180" r="110" fill="#e0f2fe"/>
+  <!-- Shield Icon -->
+  <path d="M250 100 L320 140 V230 C320 280 250 310 250 310 C250 310 180 280 180 230 V140 Z" fill="#387ed1"/>
+  <!-- Trophy / Star -->
+  <polygon points="250,150 262,185 298,185 268,206 280,240 250,218 220,240 232,206 202,185 238,185" fill="#f59e0b"/>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 450" width="1000" height="450">
+  <defs>
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#387ed1"/>
+      <stop offset="100%" stop-color="#19549e"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <rect width="1000" height="450" rx="20" fill="#f8fafc"/>
+  <!-- Mac Window Frame -->
+  <rect x="50" y="30" width="900" height="390" rx="16" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="50" y="30" width="900" height="44" rx="16" fill="#f1f5f9"/>
+  <circle cx="75" cy="52" r="6" fill="#ef4444"/>
+  <circle cx="95" cy="52" r="6" fill="#f59e0b"/>
+  <circle cx="115" cy="52" r="6" fill="#10b981"/>
+  <!-- Sidebar -->
+  <rect x="70" y="90" width="220" height="310" rx="8" fill="#f8fafc"/>
+  <rect x="85" y="110" width="140" height="12" rx="4" fill="#cbd5e1"/>
+  <rect x="85" y="140" width="190" height="35" rx="6" fill="#ffffff"/>
+  <rect x="85" y="185" width="190" height="35" rx="6" fill="#ffffff"/>
+  <rect x="85" y="230" width="190" height="35" rx="6" fill="#ffffff"/>
+  <rect x="85" y="275" width="190" height="35" rx="6" fill="#ffffff"/>
+  <!-- Main Chart Card -->
+  <rect x="310" y="90" width="610" height="310" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <!-- Line Chart -->
+  <path d="M340 330 Q420 280 480 300 T600 210 T720 230 T880 140" fill="none" stroke="url(#heroGrad)" stroke-width="4"/>
+  <path d="M340 330 Q420 280 480 300 T600 210 T720 230 T880 140 L880 360 L340 360 Z" fill="url(#heroGrad)" opacity="0.1"/>
+  <circle cx="880" cy="140" r="8" fill="#387ed1"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="600" height="450">
+  <rect width="600" height="450" rx="16" fill="#f8fafc"/>
+  <!-- Central Hub -->
+  <circle cx="300" cy="225" r="70" fill="#387ed1"/>
+  <text x="300" y="232" font-family="sans-serif" font-weight="700" font-size="20" fill="#ffffff" text-anchor="middle">StockHub</text>
+  <!-- Orbit Nodes -->
+  <circle cx="150" cy="120" r="45" fill="#3b82f6"/>
+  <text x="150" y="126" font-family="sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Kite</text>
+  <circle cx="450" cy="120" r="45" fill="#10b981"/>
+  <text x="450" y="126" font-family="sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Console</text>
+  <circle cx="150" cy="330" r="45" fill="#f59e0b"/>
+  <text x="150" y="336" font-family="sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Coin</text>
+  <circle cx="450" cy="330" r="45" fill="#8b5cf6"/>
+  <text x="450" y="336" font-family="sans-serif" font-weight="600" font-size="14" fill="#ffffff" text-anchor="middle">Varsity</text>
+  <!-- Connecting Lines -->
+  <line x1="240" y1="180" x2="185" y2="145" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6"/>
+  <line x1="360" y1="180" x2="415" y2="145" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6"/>
+  <line x1="240" y1="270" x2="185" y2="305" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6"/>
+  <line x1="360" y1="270" x2="415" y2="305" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="6"/>
+</svg>

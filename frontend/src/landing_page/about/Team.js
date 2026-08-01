@@ -13,27 +13,21 @@ function Team() {
       >
         <div className="col-6 p-3 text-center">
           <img
-            src="media/images/nithinKamath.jpg"
+            src="media/images/sowmyaa88.svg"
             style={{ borderRadius: "100%", width: "50%" }}
+            alt="sowmyaa88"
           />
-          <h4 className="mt-5">Nithin Kamath</h4>
-          <h6>Founder, CEO</h6>
+          <h4 className="mt-5">sowmyaa88</h4>
+          <h6>Founder & Lead Developer</h6>
         </div>
         <div className="col-6 p-3">
           <p>
-            Nithin bootstrapped and founded Zerodha in 2010 to overcome the
-            hurdles he faced during his decade long stint as a trader. Today,
-            Zerodha has changed the landscape of the Indian broking industry.
+            sowmyaa88 designed and developed the Stock Trading Platform to create a modern, high-performance financial experience for retail investors and active traders.
           </p>
           <p>
-            He is a member of the SEBI Secondary Market Advisory Committee
-            (SMAC) and the Market Data Advisory Committee (MDAC).
+            Built with modern technology stacks including React.js, Express, and Node.js for ultra-fast trade processing and portfolio analytics.
           </p>
-          <p>Playing basketball is his zen.</p>
-          <p>
-            Connect on <a href="">Homepage</a> / <a href="">TradingQnA</a> /{" "}
-            <a href="">Twitter</a>
-          </p>
+          <p>Passionate about open source software and modern web applications.</p>
         </div>
       </div>
     </div>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" width="320" height="60">
+  <rect width="46" height="46" x="5" y="7" rx="12" fill="#387ed1" />
+  <path d="M15 35 L24 24 L30 30 L41 17" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <polygon points="41,17 35,18 40,23" fill="#ffffff"/>
+  <text x="62" y="38" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" fill="#387ed1">StockTrading</text>
+</svg>
