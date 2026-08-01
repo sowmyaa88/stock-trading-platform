@@ -21,7 +21,7 @@ const uri = process.env.MONGO_URL;
 const app = express();
 
 // ----------------------------------------------------
-// CORS & COOKIE PARSER CONFIGURATION (OPTION B)
+// STRICT CREDENTIALED CORS CONFIGURATION
 // ----------------------------------------------------
 const allowedOrigins = [
   "http://localhost:3000",
@@ -36,7 +36,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true);
+        callback(new Error("Not allowed by CORS"), false);
       }
     },
     credentials: true,
