@@ -8,7 +8,7 @@ import Universe from "./Universe";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 
-function PricingPage() {
+function ProductsPage() {
   return (
     <>
       <Hero />
@@ -52,12 +52,11 @@ function PricingPage() {
         appStore=""
       />
       <p className="text-center mt-5 mb-5">
-        Want to know more about our technology stack? Check out the Zerodha.tech
-        blog.
+        Want to know more about our technology stack? Check out the Stock Trading blog.
       </p>
       <Universe />
     </>
   );
 }
 
-export default PricingPage;
+export default ProductsPage;
